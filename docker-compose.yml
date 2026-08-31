@@ -1,0 +1,48 @@
+# OmniEval local development stack — Postgres + Redis
+#
+# Usage:
+#   docker compose up -d          # start the database + redis
+#   docker compose down           # stop them
+#   docker compose down -v        # stop AND wipe data volumes
+#
+# The Next.js app runs on the host with `npm run dev` and connects via the
+# `DATABASE_URL` below (see .env). Rate limiting / leaderboard caching are
+# disabled locally unless you point the app at Upstash REST credentials.
+#
+# Matching .env values:
+#   DATABASE_URL="postgresql://omni_user:omni_password@localhost:5432/omnieval_db?schema=public"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: omni_user
+      POSTGRES_PASSWORD: omni_password
+      POSTGRES_DB: omnieval_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omni_user -d omnieval_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

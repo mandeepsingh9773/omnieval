@@ -1,0 +1,123 @@
+// OmniEval — Prisma schema
+// PostgreSQL datasource. The connection URL lives in the Prisma config
+// (prisma7.config.ts) under DATABASE_URL, NOT in this file (Prisma 7 behavior).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Supported BYOK providers for model runs.
+enum Provider {
+  OPENAI
+  ANTHROPIC
+  GEMINI
+  GROQ
+}
+
+/// A user account. Auth is optional: a row can represent a registered user
+/// (email + passwordHash) OR an anonymous browser session identified by
+/// `anonymousId`. Anonymous users are never asked for credentials.
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  passwordHash String?
+  anonymousId  String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  promptHistory PromptHistory[]
+
+  @@index([createdAt])
+}
+
+/// A single benchmark prompt submitted for evaluation.
+model PromptHistory {
+  id           String   @id @default(cuid())
+  userId       String?
+  anonymousId  String?
+  prompt       String
+  systemPrompt String?
+  temperature  Float    @default(0.7)
+  createdAt    DateTime @default(now())
+
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  modelRuns     ModelRun[]
+  arenaMatchups ArenaMatchup[]
+
+  @@index([userId])
+  @@index([anonymousId])
+  @@index([createdAt])
+}
+
+/// The result of running a prompt through a single provider model.
+model ModelRun {
+  id               String   @id @default(cuid())
+  promptHistoryId  String
+  provider         Provider
+  modelName        String
+  output           String
+  ttftMs           Int?
+  totalLatencyMs   Int?
+  inputTokens      Int?
+  outputTokens     Int?
+  estimatedCostUsd Float?
+  createdAt        DateTime @default(now())
+
+  promptHistory PromptHistory @relation(fields: [promptHistoryId], references: [id], onDelete: Cascade)
+
+  @@index([promptHistoryId])
+  @@index([modelName])
+  @@index([provider])
+}
+
+/// How a blind A/B matchup was judged.
+enum MatchResult {
+  MODEL_A
+  MODEL_B
+  TIE
+  BOTH_BAD
+}
+
+/// A head-to-head arena comparison between two models on the same prompt.
+/// `modelA`/`modelB` are fully-qualified names (`provider/modelId`).
+model ArenaMatchup {
+  id              String      @id @default(cuid())
+  promptHistoryId String
+  modelA          String
+  modelB          String
+  /// Judged outcome. `BOTH_BAD` and `TIE` both rate as draws for Elo.
+  result          MatchResult
+  /// Winning model, `null` for TIE/BOTH_BAD.
+  winnerModel     String?
+  /// Elo delta applied to each model after this matchup.
+  eloDeltaA       Int         @default(0)
+  eloDeltaB       Int         @default(0)
+  timestamp       DateTime    @default(now())
+
+  promptHistory PromptHistory @relation(fields: [promptHistoryId], references: [id], onDelete: Cascade)
+
+  @@index([promptHistoryId])
+  @@index([modelA])
+  @@index([modelB])
+  @@index([winnerModel])
+  @@index([timestamp])
+}
+
+/// Elo rating per model, derived from arena matchups.
+model ModelElo {
+  id         String   @id @default(cuid())
+  /// Fully-qualified model name (`provider/modelId`), unique per model.
+  modelName  String   @unique
+  rating     Int      @default(1500)
+  wins       Int      @default(0)
+  losses     Int      @default(0)
+  draws      Int      @default(0)
+  matchCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
