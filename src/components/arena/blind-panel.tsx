@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { formatUsd } from "@/lib/eval/pricing";
 import type { EvalError, ProviderId } from "@/lib/eval/types";
 import { Markdown } from "./markdown";
+import { MetricChip } from "./metric-chip";
 import { ProviderBadge } from "./provider-badge";
 
 /** What gets shown once a side is revealed after voting. */
@@ -49,8 +50,8 @@ interface BlindPanelProps {
 }
 
 const HIGHLIGHT_RING: Record<PanelHighlight, string> = {
-  winner: "ring-2 ring-emerald-500/60",
-  loser: "ring-1 ring-destructive/40",
+  winner: "ring-2 ring-status-success/60",
+  loser: "ring-1 ring-status-error/40",
   draw: "ring-1 ring-border",
 };
 
@@ -60,49 +61,42 @@ function formatDuration(ms: number | null | undefined): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function MetricChip({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Timer;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1">
-      <Icon className="size-3 shrink-0 text-muted-foreground" />
-      <span className="shrink-0 text-[0.65rem] font-medium text-muted-foreground uppercase">
-        {label}
-      </span>
-      <span className="truncate font-mono text-xs font-medium tabular-nums">{value}</span>
-    </div>
-  );
+function HighlightLabel({ highlight }: { highlight: PanelHighlight }) {
+  if (highlight === "winner") return <Badge variant="success">Winner</Badge>;
+  if (highlight === "loser") return <Badge variant="outline" className="text-muted-foreground">Lost</Badge>;
+  return <Badge variant="secondary">Draw</Badge>;
 }
 
 function EloDeltaChip({ delta, rating }: { delta: number; rating: number }) {
   const positive = delta > 0;
   const zero = delta === 0;
   return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-xs font-semibold tabular-nums",
-        positive
-          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-          : zero
-            ? "border-border bg-muted/40 text-muted-foreground"
-            : "border-destructive/30 bg-destructive/10 text-destructive",
-      )}
-    >
-      {positive ? (
-        <TrendingUp className="size-3" />
-      ) : zero ? (
-        <Minus className="size-3" />
-      ) : (
-        <TrendingDown className="size-3" />
-      )}
-      {positive ? "+" : ""}
-      {delta} · {rating} elo
+    <span className="inline-flex shrink-0 items-center overflow-hidden rounded-md border font-mono text-xs tabular-nums">
+      <span
+        className={cn(
+          "flex items-center gap-1 px-1.5 py-0.5",
+          positive
+            ? "bg-status-success/10 text-status-success"
+            : zero
+              ? "text-muted-foreground"
+              : "bg-status-error/10 text-status-error",
+        )}
+      >
+        {positive ? (
+          <TrendingUp className="size-3" />
+        ) : zero ? (
+          <Minus className="size-3" />
+        ) : (
+          <TrendingDown className="size-3" />
+        )}
+        <span className={cn(!zero && "font-semibold")}>
+          {positive ? "+" : ""}
+          {delta}
+        </span>
+      </span>
+      <span className="flex items-center border-l border-border/70 bg-muted/40 px-1.5 py-0.5 text-muted-foreground">
+        {rating} elo
+      </span>
     </span>
   );
 }
@@ -140,7 +134,10 @@ export function BlindPanel({
     >
       <CardHeader className="shrink-0 gap-2 border-b p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-semibold tracking-tight">{label}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold tracking-tight">{label}</span>
+            {revealed && highlight && <HighlightLabel highlight={highlight} />}
+          </div>
           {revealed && reveal ? (
             <div className="flex flex-wrap items-center gap-2">
               <ProviderBadge provider={reveal.provider} />
@@ -148,7 +145,7 @@ export function BlindPanel({
               <EloDeltaChip delta={reveal.delta} rating={reveal.rating} />
             </div>
           ) : (
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="outline" className="gap-1.5 border-dashed text-muted-foreground">
               <EyeOff className="size-3" />
               Hidden
             </Badge>
@@ -156,7 +153,7 @@ export function BlindPanel({
         </div>
       </CardHeader>
 
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col p-3">
         <div className="min-h-0 flex-1 overflow-y-auto">
           {error ? (
             <Alert variant="destructive">
@@ -170,7 +167,7 @@ export function BlindPanel({
             isStreaming ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   Waiting for first token…
                 </div>
                 <Skeleton />
@@ -180,9 +177,17 @@ export function BlindPanel({
                 <p>No output produced.</p>
               </div>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-                <EyeOff className="size-6 opacity-40" />
-                <p>Identity and metrics stay hidden until you vote.</p>
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <EyeOff className="size-5 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium">Hidden until you vote</p>
+                  <p className="max-w-56 text-xs text-muted-foreground">
+                    Identities and metrics stay concealed to keep the comparison
+                    unbiased.
+                  </p>
+                </div>
               </div>
             )
           ) : (
@@ -194,9 +199,11 @@ export function BlindPanel({
             </div>
           )}
         </div>
+      </CardContent>
 
+      <div className="shrink-0 border-t border-border/60 px-3 py-2">
         {revealed && reveal ? (
-          <div className="grid shrink-0 grid-cols-2 gap-1.5 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
             <MetricChip icon={Timer} label="TTFT" value={formatDuration(reveal.ttftMs)} />
             <MetricChip
               icon={Clock}
@@ -218,12 +225,17 @@ export function BlindPanel({
               }
             />
           </div>
-        ) : hasOutput && !error ? (
-          <p className="shrink-0 text-center text-[0.7rem] text-muted-foreground">
+        ) : hasOutput && !error && !isStreaming ? (
+          <p className="flex items-center justify-center gap-1.5 text-center text-[0.7rem] text-muted-foreground">
+            <EyeOff className="size-3" />
             Vote to reveal the model and its metrics
           </p>
-        ) : null}
-      </CardContent>
+        ) : (
+          <p className="text-center text-[0.7rem] text-muted-foreground">
+            Metrics appear after you vote
+          </p>
+        )}
+      </div>
     </Card>
   );
 }

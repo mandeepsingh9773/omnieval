@@ -7,16 +7,20 @@ import {
   KeyRound,
   Loader2,
   RotateCcw,
+  Scale,
   Settings2,
   Sparkles,
   Square,
   Swords,
+  ThumbsDown,
+  Trophy,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { useKeyVault } from "@/lib/byok/key-vault";
 import { KeyVaultDialog } from "@/components/byok/key-vault-dialog";
 import { ALL_MODEL_OPTIONS } from "@/lib/eval/models";
@@ -26,12 +30,10 @@ import type { VoteResult } from "@/lib/arena/elo";
 import { useModelStream } from "@/hooks/use-model-stream";
 import { Leaderboard } from "./leaderboard";
 import { BlindPanel, type PanelHighlight, type RevealInfo } from "./blind-panel";
+import { SliderField } from "./slider-field";
 import { VoteBar } from "./vote-bar";
 
 type Phase = "idle" | "battling" | "ready" | "failed" | "voted";
-
-const inputClass =
-  "w-full resize-none rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 function shuffle<T>(items: readonly T[]): T[] {
   const copy = [...items];
@@ -233,64 +235,48 @@ export function BlindArena() {
     <div className="flex flex-col gap-4">
       {/* Prompt + controls */}
       <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5">
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="arena-mode-prompt">Prompt</Label>
-            <textarea
+            <Textarea
               id="arena-mode-prompt"
               value={prompt}
               rows={4}
               onChange={(event) => setPrompt(event.target.value)}
               placeholder="Ask the two mystery models anything…"
-              className={inputClass}
             />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="arena-mode-system">System prompt (optional)</Label>
-            <textarea
+            <Textarea
               id="arena-mode-system"
               value={systemPrompt}
               rows={4}
               onChange={(event) => setSystemPrompt(event.target.value)}
               placeholder="You are a precise, terse assistant."
-              className={inputClass}
             />
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium">Temperature</Label>
-              <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                {temperature.toFixed(2)}
-              </span>
-            </div>
-            <Slider
-              value={[temperature]}
-              min={0}
-              max={2}
-              step={0.05}
-              onValueChange={([next]) => setTemperature(next)}
-              aria-label="Temperature"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium">Max tokens</Label>
-              <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                {maxTokens.toLocaleString()}
-              </span>
-            </div>
-            <Slider
-              value={[maxTokens]}
-              min={128}
-              max={8192}
-              step={64}
-              onValueChange={([next]) => setMaxTokens(next)}
-              aria-label="Max tokens"
-            />
-          </div>
+          <SliderField
+            label="Temperature"
+            value={temperature}
+            min={0}
+            max={2}
+            step={0.05}
+            display={temperature.toFixed(2)}
+            onChange={setTemperature}
+          />
+          <SliderField
+            label="Max tokens"
+            value={maxTokens}
+            min={128}
+            max={8192}
+            step={64}
+            display={maxTokens.toLocaleString()}
+            onChange={setMaxTokens}
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -320,11 +306,14 @@ export function BlindArena() {
             </Button>
           )}
 
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <Swords className="size-3.5" />
-            <span>
-              Two random models from your configured keys · hidden until you vote
-            </span>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="hidden h-6 w-px bg-border sm:block" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Swords className="size-3.5" />
+              <span>
+                Two random models from your configured keys · hidden until you vote
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -392,12 +381,24 @@ export function BlindArena() {
 
       {phase === "voted" && reveal && (
         <div className="flex justify-center">
-          <p className="text-sm font-medium">
-            {reveal.result === "MODEL_A" && "Model A wins this round"}
-            {reveal.result === "MODEL_B" && "Model B wins this round"}
-            {reveal.result === "TIE" && "It’s a tie"}
-            {reveal.result === "BOTH_BAD" && "Both responses were rated bad"}
-          </p>
+          {reveal.result === "MODEL_A" || reveal.result === "MODEL_B" ? (
+            <Badge variant="success" className="gap-1.5 px-3 py-1 text-sm">
+              <Trophy className="size-4" />
+              {reveal.result === "MODEL_A"
+                ? "Model A wins this round"
+                : "Model B wins this round"}
+            </Badge>
+          ) : reveal.result === "TIE" ? (
+            <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
+              <Scale className="size-4" />
+              It&rsquo;s a tie
+            </Badge>
+          ) : (
+            <Badge variant="warning" className="gap-1.5 px-3 py-1 text-sm">
+              <ThumbsDown className="size-4" />
+              Both responses were rated bad
+            </Badge>
+          )}
         </div>
       )}
 

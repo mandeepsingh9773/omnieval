@@ -29,14 +29,12 @@ interface ChartPoint {
   tokensPerSecond: number | null;
 }
 
-const PROVIDER_BAR_COLORS: Record<ProviderId, string> = {
-  openai: "#10b981",
-  anthropic: "#f97316",
-  gemini: "#3b82f6",
-  groq: "#8b5cf6",
-};
+/** Provider identity color resolved from the `--provider-*` theme tokens. */
+function providerColor(provider: ProviderId): string {
+  return `var(--provider-${provider})`;
+}
 
-const AXIS_TICK = { fontSize: 11, fill: "hsl(var(--muted-foreground))" };
+const AXIS_TICK = { fontSize: 11, fill: "var(--muted-foreground)" };
 
 interface SubChartProps {
   title: string;
@@ -60,13 +58,14 @@ function SubChart({ title, subtitle, icon: Icon, data, dataKey, unit }: SubChart
       <div className="h-56 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
             <XAxis
               dataKey="modelId"
               tick={AXIS_TICK}
               tickLine={false}
-              axisLine={{ stroke: "hsl(var(--border))" }}
-              interval={0}
+              axisLine={{ stroke: "var(--border)" }}
+              interval="preserveStartEnd"
+              minTickGap={12}
             />
             <YAxis
               tick={AXIS_TICK}
@@ -76,13 +75,13 @@ function SubChart({ title, subtitle, icon: Icon, data, dataKey, unit }: SubChart
               width={56}
             />
             <Tooltip
-              cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
+              cursor={{ fill: "color-mix(in oklab, var(--muted) 40%, transparent)" }}
               contentStyle={{
                 fontSize: 12,
                 borderRadius: 8,
-                border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--popover))",
-                color: "hsl(var(--popover-foreground))",
+                border: "1px solid var(--border)",
+                background: "var(--popover)",
+                color: "var(--popover-foreground)",
               }}
               labelStyle={{ fontWeight: 600 }}
               formatter={(value, _name, entry) => {
@@ -93,7 +92,7 @@ function SubChart({ title, subtitle, icon: Icon, data, dataKey, unit }: SubChart
             />
             <Bar dataKey={dataKey} radius={[4, 4, 0, 0]} maxBarSize={48} isAnimationActive={false}>
               {data.map((point) => (
-                <Cell key={point.fullName} fill={PROVIDER_BAR_COLORS[point.provider]} />
+                <Cell key={point.fullName} fill={providerColor(point.provider)} />
               ))}
             </Bar>
           </BarChart>
@@ -104,7 +103,7 @@ function SubChart({ title, subtitle, icon: Icon, data, dataKey, unit }: SubChart
           <span key={provider} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span
               className="size-2.5 rounded-sm"
-              style={{ backgroundColor: PROVIDER_BAR_COLORS[provider] }}
+              style={{ backgroundColor: providerColor(provider) }}
             />
             {PROVIDER_METADATA[provider].label}
           </span>

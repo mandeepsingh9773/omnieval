@@ -72,7 +72,7 @@ export function ExportMenu({ session, disabled = false }: ExportMenuProps) {
           return (
             <DropdownMenuItem key={format} onSelect={() => handleExport(format)}>
               {active ? (
-                <Check className="text-emerald-500" />
+                <Check className="text-status-success" />
               ) : (
                 <Icon className="text-muted-foreground" />
               )}

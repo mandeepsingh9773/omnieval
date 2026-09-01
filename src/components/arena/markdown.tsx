@@ -39,13 +39,13 @@ function CodeBlock({ children }: { children: ReactNode }) {
       <Button
         size="icon-xs"
         variant="ghost"
-        aria-label="Copy code"
+        aria-label={copied ? "Copied code" : "Copy code"}
         onClick={copy}
-        className="absolute top-1.5 right-1.5 z-10 bg-transparent opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute top-1.5 right-1.5 z-10 text-code-foreground opacity-0 transition-opacity hover:bg-code-foreground/10 hover:text-code-foreground group-hover:opacity-100 focus-visible:opacity-100"
       >
-        {copied ? <Check className="text-emerald-400" /> : <Copy />}
+        {copied ? <Check className="text-status-success" /> : <Copy />}
       </Button>
-      <pre className="!my-3 overflow-x-auto rounded-lg border border-border bg-[#0d1117] p-3 text-[0.8125rem] leading-relaxed">
+      <pre className="!my-3 overflow-x-auto rounded-lg border border-code-border bg-code-background p-3 text-[0.8125rem] leading-relaxed">
         {children}
       </pre>
     </div>

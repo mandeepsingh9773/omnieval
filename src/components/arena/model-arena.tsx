@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { BarChart3, KeyRound, Loader2, Settings2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { KeyVaultDialog } from "@/components/byok/key-vault-dialog";
@@ -194,10 +195,13 @@ export function ModelArena() {
         onAddModel={handleAddModel}
       />
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <BarChart3 className="size-4" />
-          <span>Results</span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-md bg-muted">
+            <BarChart3 className="size-4 text-muted-foreground" />
+          </div>
+          <span className="text-sm font-semibold tracking-tight">Results</span>
+          <Badge variant="secondary">{panels.length}/{MAX_PANELS}</Badge>
         </div>
         <ExportMenu session={session} disabled={!hasResults} />
       </div>

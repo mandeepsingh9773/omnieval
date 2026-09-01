@@ -35,68 +35,12 @@ import { formatUsd } from "@/lib/eval/pricing";
 import type { EvalError, ProviderId } from "@/lib/eval/types";
 import { useModelStream } from "@/hooks/use-model-stream";
 import { Markdown } from "./markdown";
-import { PROVIDER_STYLES, ProviderBadge } from "./provider-badge";
+import { MetricChip } from "./metric-chip";
+import { PROVIDER_STYLES, ProviderDot } from "./provider-badge";
+import { StatusBadge } from "./status-badge";
 import type { PanelResult, PanelStatus, RunCommand } from "./types";
 
 const PROVIDER_IDS: readonly ProviderId[] = ["openai", "anthropic", "gemini", "groq"];
-
-const STATUS_STYLE: Record<PanelStatus, { badge: string; dot: string; label: string }> = {
-  idle: {
-    badge: "border-border bg-muted/40 text-muted-foreground",
-    dot: "bg-muted-foreground",
-    label: "Idle",
-  },
-  streaming: {
-    badge: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    dot: "bg-blue-500 animate-pulse",
-    label: "Streaming",
-  },
-  completed: {
-    badge: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-    dot: "bg-emerald-500",
-    label: "Completed",
-  },
-  error: {
-    badge: "border-destructive/40 bg-destructive/10 text-destructive",
-    dot: "bg-destructive",
-    label: "Error",
-  },
-};
-
-function StatusBadge({ status }: { status: PanelStatus }) {
-  const style = STATUS_STYLE[status];
-  return (
-    <span
-      className={cn(
-        "inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full border px-2 text-[0.7rem] font-medium whitespace-nowrap",
-        style.badge,
-      )}
-    >
-      <span className={cn("size-1.5 rounded-full", style.dot)} />
-      {style.label}
-    </span>
-  );
-}
-
-function MetricChip({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Timer;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1">
-      <Icon className="size-3 shrink-0 text-muted-foreground" />
-      <span className="shrink-0 text-[0.65rem] font-medium text-muted-foreground uppercase">
-        {label}
-      </span>
-      <span className="truncate font-mono text-xs font-medium tabular-nums">{value}</span>
-    </div>
-  );
-}
 
 function formatDuration(ms: number | null | undefined): string {
   if (ms === null || ms === undefined || !Number.isFinite(ms)) return "—";
@@ -262,24 +206,34 @@ export function ModelPanel({
   const providerStyle = PROVIDER_STYLES[provider];
 
   return (
-    <Card className="flex h-[30rem] flex-col overflow-hidden xl:h-[32rem]">
+    <Card className="@container flex h-[30rem] flex-col overflow-hidden xl:h-[32rem]">
       <CardHeader className="shrink-0 gap-2 border-b p-2.5 sm:p-3">
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={provider}
-            onChange={(event) => handleProviderChange(event.target.value as ProviderId)}
-            aria-label="Provider"
-            className={cn(
-              "h-5 max-w-28 cursor-pointer appearance-none rounded-md border px-1.5 text-[0.7rem] font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-              providerStyle.badge,
-            )}
+            onValueChange={(value) => handleProviderChange(value as ProviderId)}
           >
-            {PROVIDER_IDS.map((id) => (
-              <option key={id} value={id}>
-                {PROVIDER_METADATA[id].label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              size="sm"
+              aria-label="Provider"
+              className={cn(
+                "h-7 shrink-0 rounded-md border px-1.5 text-[0.7rem] font-medium",
+                providerStyle.trigger,
+              )}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PROVIDER_IDS.map((id) => (
+                <SelectItem key={id} value={id}>
+                  <span className="flex items-center gap-1.5">
+                    <ProviderDot provider={id} />
+                    {PROVIDER_METADATA[id].label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Select value={modelId} onValueChange={handleModelChange}>
             <SelectTrigger size="sm" className="h-7 min-w-0 flex-1">
@@ -301,7 +255,7 @@ export function ModelPanel({
             disabled={!text}
             onClick={copyOutput}
           >
-            {copied ? <Check className="text-emerald-500" /> : <Copy />}
+            {copied ? <Check className="text-status-success" /> : <Copy />}
           </Button>
           {canRemove && (
             <Button size="icon-sm" variant="ghost" aria-label="Remove panel" onClick={handleRemove}>
@@ -309,13 +263,11 @@ export function ModelPanel({
             </Button>
           )}
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <StatusBadge status={status} />
-          <ProviderBadge provider={provider} />
-        </div>
+
+        <StatusBadge status={status} />
       </CardHeader>
 
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col p-3">
         <div className="min-h-0 flex-1 overflow-y-auto">
           {status === "error" ? (
             <Alert variant="destructive">
@@ -329,15 +281,22 @@ export function ModelPanel({
             status === "streaming" ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   Waiting for first token…
                 </div>
                 <Skeleton />
               </div>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-                <Zap className="size-6 opacity-40" />
-                <p>Ready. Set a prompt and press Run to benchmark this model.</p>
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <Zap className="size-5 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium">Ready to run</p>
+                  <p className="max-w-56 text-xs text-muted-foreground">
+                    Set a prompt and press Run to benchmark this model.
+                  </p>
+                </div>
               </div>
             )
           ) : (
@@ -349,63 +308,63 @@ export function ModelPanel({
             </div>
           )}
         </div>
-
-        <div className="shrink-0">
-          {showMetrics ? (
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              <MetricChip icon={Timer} label="TTFT" value={formatDuration(displayTTFT)} />
-              <MetricChip
-                icon={Zap}
-                label="Speed"
-                value={
-                  metrics?.tokensPerSecond !== null &&
-                  metrics?.tokensPerSecond !== undefined
-                    ? `${metrics.tokensPerSecond.toFixed(1)} tok/s`
-                    : isStreaming
-                      ? "…"
-                      : "—"
-                }
-              />
-              <MetricChip
-                icon={Clock}
-                label="Total"
-                value={formatDuration(metrics?.totalLatencyMs)}
-              />
-              <MetricChip
-                icon={FileText}
-                label="Tokens"
-                value={
-                  metrics
-                    ? `${metrics.inputTokens}/${metrics.outputTokens}`
-                    : isStreaming
-                      ? "…"
-                      : "—"
-                }
-              />
-              <MetricChip
-                icon={DollarSign}
-                label="Cost"
-                value={
-                  metrics
-                    ? formatUsd(metrics.estimatedCostUsd)
-                    : isStreaming
-                      ? "…"
-                      : "—"
-                }
-              />
-              <MetricChip
-                icon={Clock}
-                label="Reason"
-                value={metrics?.finishReason ?? "—"}
-              />
-            </div>
-          ) : (
-            <p className="text-center text-[0.7rem] text-muted-foreground">
-              Metrics appear once streaming starts
-            </p>
-          )}
-        </div>
       </CardContent>
+
+      <div className="shrink-0 border-t border-border/60 px-3 py-2">
+        {showMetrics ? (
+          <div className="grid grid-cols-2 gap-1.5 @sm:grid-cols-3">
+            <MetricChip icon={Timer} label="TTFT" value={formatDuration(displayTTFT)} />
+            <MetricChip
+              icon={Zap}
+              label="Speed"
+              value={
+                metrics?.tokensPerSecond !== null &&
+                metrics?.tokensPerSecond !== undefined
+                  ? `${metrics.tokensPerSecond.toFixed(1)} tok/s`
+                  : isStreaming
+                    ? "…"
+                    : "—"
+              }
+            />
+            <MetricChip
+              icon={Clock}
+              label="Total"
+              value={formatDuration(metrics?.totalLatencyMs)}
+            />
+            <MetricChip
+              icon={FileText}
+              label="Tokens"
+              value={
+                metrics
+                  ? `${metrics.inputTokens}/${metrics.outputTokens}`
+                  : isStreaming
+                    ? "…"
+                    : "—"
+              }
+            />
+            <MetricChip
+              icon={DollarSign}
+              label="Cost"
+              value={
+                metrics
+                  ? formatUsd(metrics.estimatedCostUsd)
+                  : isStreaming
+                    ? "…"
+                    : "—"
+              }
+            />
+            <MetricChip
+              icon={Clock}
+              label="Reason"
+              value={metrics?.finishReason ?? "—"}
+            />
+          </div>
+        ) : (
+          <p className="text-center text-[0.7rem] text-muted-foreground">
+            Metrics appear once streaming starts
+          </p>
+        )}
+      </div>
     </Card>
   );
 }

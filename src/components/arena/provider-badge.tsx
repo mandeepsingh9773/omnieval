@@ -7,33 +7,41 @@ interface ProviderStyle {
   label: string;
   /** Classes for the small colored badge. Static strings so Tailwind can scan them. */
   badge: string;
+  /** Classes for a provider-tinted select trigger (includes dark-mode overrides). */
+  trigger: string;
   dot: string;
 }
 
+/** Single source of truth for provider color identity. Theme-aware via tokens. */
 export const PROVIDER_STYLES: Record<ProviderId, ProviderStyle> = {
   openai: {
     label: "OpenAI",
-    badge:
-      "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-    dot: "bg-emerald-500",
+    badge: "border-provider-openai/30 bg-provider-openai/10 text-provider-openai",
+    trigger:
+      "border-provider-openai/30 bg-provider-openai/10 text-provider-openai dark:bg-provider-openai/15 dark:hover:bg-provider-openai/25",
+    dot: "bg-provider-openai",
   },
   anthropic: {
     label: "Anthropic",
     badge:
-      "border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-400",
-    dot: "bg-orange-500",
+      "border-provider-anthropic/30 bg-provider-anthropic/10 text-provider-anthropic",
+    trigger:
+      "border-provider-anthropic/30 bg-provider-anthropic/10 text-provider-anthropic dark:bg-provider-anthropic/15 dark:hover:bg-provider-anthropic/25",
+    dot: "bg-provider-anthropic",
   },
   gemini: {
     label: "Gemini",
-    badge:
-      "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    dot: "bg-blue-500",
+    badge: "border-provider-gemini/30 bg-provider-gemini/10 text-provider-gemini",
+    trigger:
+      "border-provider-gemini/30 bg-provider-gemini/10 text-provider-gemini dark:bg-provider-gemini/15 dark:hover:bg-provider-gemini/25",
+    dot: "bg-provider-gemini",
   },
   groq: {
     label: "Groq",
-    badge:
-      "border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-400",
-    dot: "bg-violet-500",
+    badge: "border-provider-groq/30 bg-provider-groq/10 text-provider-groq",
+    trigger:
+      "border-provider-groq/30 bg-provider-groq/10 text-provider-groq dark:bg-provider-groq/15 dark:hover:bg-provider-groq/25",
+    dot: "bg-provider-groq",
   },
 };
 

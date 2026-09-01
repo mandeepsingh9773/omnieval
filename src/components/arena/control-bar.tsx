@@ -13,43 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { PROVIDER_METADATA } from "@/lib/byok/providers";
 import { MAX_PANELS } from "@/lib/eval/models";
 import type { ProviderId } from "@/lib/eval/types";
 import { ProviderDot } from "./provider-badge";
-
-const inputClass =
-  "w-full resize-none rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
-interface SliderRowProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  display: string;
-  onChange: (value: number) => void;
-}
-
-function SliderRow({ label, value, min, max, step, display, onChange }: SliderRowProps) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between">
-        <Label className="text-xs font-medium">{label}</Label>
-        <span className="font-mono text-xs text-muted-foreground tabular-nums">{display}</span>
-      </div>
-      <Slider
-        value={[value]}
-        min={min}
-        max={max}
-        step={step}
-        onValueChange={([next]) => onChange(next)}
-        aria-label={label}
-      />
-    </div>
-  );
-}
+import { SliderField } from "./slider-field";
 
 export interface AddableModel {
   provider: ProviderId;
@@ -104,17 +73,16 @@ export function ControlBar(props: ControlBarProps) {
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5">
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="arena-prompt">Prompt</Label>
-          <textarea
+          <Textarea
             id="arena-prompt"
             value={prompt}
             rows={5}
             onChange={(event) => onPromptChange(event.target.value)}
             onKeyDown={handleShortcut}
             placeholder="Ask the models anything…"
-            className={inputClass}
           />
           <p className="text-[0.7rem] text-muted-foreground">
             Press <kbd className="rounded border bg-muted px-1 font-mono">⌘/Ctrl</kbd> +{" "}
@@ -123,20 +91,19 @@ export function ControlBar(props: ControlBarProps) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="arena-system">System prompt (optional)</Label>
-          <textarea
+          <Textarea
             id="arena-system"
             value={systemPrompt}
             rows={5}
             onChange={(event) => onSystemPromptChange(event.target.value)}
             onKeyDown={handleShortcut}
             placeholder="You are a precise, terse assistant."
-            className={inputClass}
           />
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <SliderRow
+        <SliderField
           label="Temperature"
           value={temperature}
           min={0}
@@ -145,7 +112,7 @@ export function ControlBar(props: ControlBarProps) {
           display={temperature.toFixed(2)}
           onChange={onTemperatureChange}
         />
-        <SliderRow
+        <SliderField
           label="Max tokens"
           value={maxTokens}
           min={128}
@@ -167,7 +134,8 @@ export function ControlBar(props: ControlBarProps) {
           </Button>
         )}
 
-        <div className="ml-auto">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="hidden h-6 w-px bg-border sm:block" aria-hidden="true" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant="outline" disabled={atMaxPanels}>

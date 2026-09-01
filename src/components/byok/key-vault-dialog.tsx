@@ -9,6 +9,8 @@ import {
   EyeOff,
   KeyRound,
   Loader2,
+  Lock,
+  ServerOff,
   ShieldCheck,
   Trash2,
   XCircle,
@@ -45,6 +47,10 @@ import type { KeyProvider, ValidationResult, ValidationStatus } from "@/lib/byok
  * - The vault exposes masked, in-memory keys to the rest of the app.
  * - Validation is performed client-side against the provider's public API.
  */
+
+function providerDot(provider: KeyProvider): string {
+  return `var(--provider-${provider})`;
+}
 
 const STATUS_META: Record<
   Exclude<ValidationStatus, "idle" | "validating">,
@@ -119,12 +125,17 @@ function ProviderKeyPanel({ provider }: { provider: KeyProvider }) {
   return (
     <div className="flex flex-col gap-4">
       {configured ? (
-        <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-3 py-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <Badge variant="secondary" className="shrink-0">
+        <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: providerDot(provider) }}
+            />
+            <Badge variant="success" className="shrink-0 gap-1">
+              <CheckCircle2 className="size-3" />
               Configured
             </Badge>
-            <code className="truncate text-xs text-muted-foreground">
+            <code className="truncate font-mono text-xs text-muted-foreground">
               {storedValue ? maskSecret(storedValue) : "••••"}
             </code>
           </div>
@@ -143,16 +154,29 @@ function ProviderKeyPanel({ provider }: { provider: KeyProvider }) {
           </Button>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          No {meta.label} key stored yet.
-        </p>
+        <div className="flex items-center gap-2.5 rounded-lg border border-dashed bg-muted/20 px-3 py-2.5">
+          <span
+            className="size-2 shrink-0 rounded-full opacity-40"
+            style={{ backgroundColor: providerDot(provider) }}
+          />
+          <p className="text-sm text-muted-foreground">
+            No {meta.label} key stored yet.
+          </p>
+        </div>
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor={`key-${provider}`}>
-          {configured ? "Replace key" : `${meta.label} API key`}
-        </Label>
-        <div className="flex gap-2">
+        <div className="flex items-baseline justify-between gap-2">
+          <Label htmlFor={`key-${provider}`}>
+            {configured ? "Replace key" : `${meta.label} API key`}
+          </Label>
+          {configured && (
+            <span className="text-xs text-muted-foreground">
+              Paste a new key to overwrite
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <Input
               id={`key-${provider}`}
@@ -161,33 +185,34 @@ function ProviderKeyPanel({ provider }: { provider: KeyProvider }) {
               spellCheck={false}
               placeholder={meta.placeholder}
               value={draft}
+              aria-invalid={status === "invalid" || status === "error" || undefined}
               disabled={!isReady || busy !== null}
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") void handleSave();
               }}
-              className="pr-9"
+              className="pr-10"
             />
             <button
               type="button"
               onClick={() => setShowDraft((prev) => !prev)}
-              className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute top-1/2 right-1.5 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
               aria-label={showDraft ? "Hide key" : "Show key"}
-              tabIndex={-1}
             >
               {showDraft ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
           <Button
-            variant="outline"
+            variant="default"
             disabled={!isReady || busy !== null || !draft.trim()}
             onClick={handleSave}
+            className="w-full shrink-0 sm:w-auto"
           >
             {busy === "save" ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
             Save &amp; Validate
           </Button>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <span>{meta.help}</span>
           <a
             href={meta.dashboardUrl}
@@ -202,13 +227,21 @@ function ProviderKeyPanel({ provider }: { provider: KeyProvider }) {
 
       {status === "validating" && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
           Validating key against {meta.label}…
         </div>
       )}
 
       {(status === "valid" || status === "invalid" || status === "error") && (
-        <Alert variant={status === "valid" ? "default" : "destructive"}>
+        <Alert
+          variant={
+            status === "valid"
+              ? "success"
+              : status === "invalid"
+                ? "destructive"
+                : "warning"
+          }
+        >
           {status === "valid" ? (
             <CheckCircle2 />
           ) : status === "invalid" ? (
@@ -257,32 +290,46 @@ export function KeyVaultDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Your API Keys</DialogTitle>
-          <DialogDescription>
-            Bring your own keys. Keys are AES-encrypted and stored only in your
-            browser&apos;s localStorage — they are never sent to OmniEval servers,
-            never logged, and never stored in the database. When a run is
-            executed, your key is used directly against the provider from this
-            browser.
+          <DialogDescription asChild>
+            <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Lock className="size-4 shrink-0" />
+                AES-GCM encrypted, stored only in this browser
+              </li>
+              <li className="flex items-center gap-2">
+                <ServerOff className="size-4 shrink-0" />
+                Never sent to OmniEval servers, logged, or persisted
+              </li>
+              <li className="flex items-center gap-2">
+                <KeyRound className="size-4 shrink-0" />
+                Used directly against the provider when you run
+              </li>
+            </ul>
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="openai">
-          <TabsList className="w-full">
+          <TabsList className="w-full overflow-x-auto">
             {PROVIDER_LIST.map((meta) => (
-              <TabsTrigger key={meta.id} value={meta.id}>
+              <TabsTrigger key={meta.id} value={meta.id} className="gap-1.5">
+                <span
+                  className="size-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: providerDot(meta.id) }}
+                />
                 {meta.label}
               </TabsTrigger>
             ))}
           </TabsList>
           {PROVIDER_LIST.map((meta) => (
-            <TabsContent key={meta.id} value={meta.id} className="pt-2">
+            <TabsContent key={meta.id} value={meta.id} className="pt-3">
               <ProviderKeyPanel provider={meta.id} />
             </TabsContent>
           ))}
         </Tabs>
 
         <DialogFooter showCloseButton className="flex-col-reverse sm:flex-row sm:justify-between">
-          <p className="text-xs text-muted-foreground sm:justify-start">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground sm:justify-start">
+            <Lock className="size-3.5" />
             Stored locally · encrypted at rest
           </p>
         </DialogFooter>

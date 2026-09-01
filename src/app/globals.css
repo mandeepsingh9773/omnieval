@@ -42,6 +42,30 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Semantic surfaces + text */
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-text-subtle: var(--text-subtle);
+
+  /* Status semantics */
+  --color-status-streaming: var(--status-streaming);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+
+  /* Provider identities */
+  --color-provider-openai: var(--provider-openai);
+  --color-provider-anthropic: var(--provider-anthropic);
+  --color-provider-gemini: var(--provider-gemini);
+  --color-provider-groq: var(--provider-groq);
+
+  /* Code blocks */
+  --color-code-background: var(--code-background);
+  --color-code-border: var(--code-border);
+  --color-code-foreground: var(--code-foreground);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -52,72 +76,150 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  color-scheme: light;
+
+  /* Cool-slate neutrals */
+  --background: oklch(0.982 0.006 250);
+  --foreground: oklch(0.23 0.025 260);
+  --card: oklch(0.995 0.003 250);
+  --card-foreground: oklch(0.23 0.025 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --popover-foreground: oklch(0.23 0.025 260);
+
+  /* Blue/cyan primary accent */
+  --primary: oklch(0.5 0.18 255);
+  --primary-foreground: oklch(0.985 0.002 250);
+
+  --secondary: oklch(0.955 0.008 250);
+  --secondary-foreground: oklch(0.3 0.03 260);
+  --muted: oklch(0.955 0.008 250);
+  --muted-foreground: oklch(0.47 0.015 255);
+  --accent: oklch(0.945 0.01 250);
+  --accent-foreground: oklch(0.3 0.03 260);
+
+  /* Destructive / error */
+  --destructive: oklch(0.55 0.2 25);
+
+  --border: oklch(0.91 0.01 250);
+  --input: oklch(0.91 0.01 250);
+  --ring: oklch(0.62 0.15 255);
+
+  /* Chart palette */
+  --chart-1: oklch(0.55 0.18 255);
+  --chart-2: oklch(0.68 0.14 225);
+  --chart-3: oklch(0.6 0.16 160);
+  --chart-4: oklch(0.72 0.15 80);
+  --chart-5: oklch(0.55 0.16 295);
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.96 0.008 250);
+  --sidebar-foreground: oklch(0.23 0.025 260);
+  --sidebar-primary: oklch(0.5 0.18 255);
+  --sidebar-primary-foreground: oklch(0.985 0.002 250);
+  --sidebar-accent: oklch(0.945 0.01 250);
+  --sidebar-accent-foreground: oklch(0.3 0.03 260);
+  --sidebar-border: oklch(0.91 0.01 250);
+  --sidebar-ring: oklch(0.62 0.15 255);
+
+  /* Semantic surfaces + text (alias the neutral ladder) */
+  --surface-subtle: var(--muted);
+  --surface-raised: var(--card);
+  --surface-elevated: var(--popover);
+  --text-subtle: var(--muted-foreground);
+
+  /* Status semantics */
+  --status-streaming: oklch(0.6 0.16 235);
+  --status-success: oklch(0.55 0.15 160);
+  --status-warning: oklch(0.62 0.15 80);
+  --status-error: oklch(0.55 0.2 25);
+
+  /* Provider identities */
+  --provider-openai: oklch(0.55 0.15 162);
+  --provider-anthropic: oklch(0.62 0.15 55);
+  --provider-gemini: oklch(0.58 0.14 240);
+  --provider-groq: oklch(0.55 0.16 295);
+
+  /* Code blocks (kept dark in both themes to match the github-dark highlighter) */
+  --code-background: oklch(0.19 0.02 260);
+  --code-border: oklch(1 0 0 / 14%);
+  --code-foreground: oklch(0.92 0.01 250);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+
+  /* Cool-slate neutrals */
+  --background: oklch(0.145 0.02 260);
+  --foreground: oklch(0.97 0.004 250);
+  --card: oklch(0.19 0.02 258);
+  --card-foreground: oklch(0.97 0.004 250);
+  --popover: oklch(0.21 0.02 258);
+  --popover-foreground: oklch(0.97 0.004 250);
+
+  /* Blue/cyan primary accent */
+  --primary: oklch(0.7 0.16 256);
+  --primary-foreground: oklch(0.15 0.02 260);
+
+  --secondary: oklch(0.25 0.02 258);
+  --secondary-foreground: oklch(0.97 0.004 250);
+  --muted: oklch(0.25 0.02 258);
+  --muted-foreground: oklch(0.71 0.015 255);
+  --accent: oklch(0.27 0.025 258);
+  --accent-foreground: oklch(0.97 0.004 250);
+
+  /* Destructive / error */
+  --destructive: oklch(0.7 0.19 25);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.62 0.15 255);
+
+  /* Chart palette */
+  --chart-1: oklch(0.7 0.16 256);
+  --chart-2: oklch(0.72 0.12 230);
+  --chart-3: oklch(0.75 0.14 165);
+  --chart-4: oklch(0.82 0.13 85);
+  --chart-5: oklch(0.68 0.15 295);
+
+  --sidebar: oklch(0.17 0.02 258);
+  --sidebar-foreground: oklch(0.97 0.004 250);
+  --sidebar-primary: oklch(0.7 0.16 256);
+  --sidebar-primary-foreground: oklch(0.15 0.02 260);
+  --sidebar-accent: oklch(0.27 0.025 258);
+  --sidebar-accent-foreground: oklch(0.97 0.004 250);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.62 0.15 255);
+
+  /* Semantic surfaces + text (alias the neutral ladder) */
+  --surface-subtle: var(--muted);
+  --surface-raised: var(--card);
+  --surface-elevated: var(--popover);
+  --text-subtle: var(--muted-foreground);
+
+  /* Status semantics */
+  --status-streaming: oklch(0.72 0.13 230);
+  --status-success: oklch(0.74 0.14 165);
+  --status-warning: oklch(0.82 0.13 85);
+  --status-error: oklch(0.7 0.19 25);
+
+  /* Provider identities */
+  --provider-openai: oklch(0.72 0.13 168);
+  --provider-anthropic: oklch(0.76 0.13 60);
+  --provider-gemini: oklch(0.72 0.11 235);
+  --provider-groq: oklch(0.7 0.14 295);
+
+  /* Code blocks */
+  --code-background: oklch(0.14 0.02 260);
+  --code-border: oklch(1 0 0 / 14%);
+  --code-foreground: oklch(0.93 0.01 250);
+}
+
+/* Code surfaces are intentionally dark in both themes to match the
+   github-dark highlighter. Override the hard-coded `.hljs` colors from
+   `highlight.js/styles/github-dark.css` so blocks follow our tokens. */
+.hljs {
+  background: var(--code-background);
+  color: var(--code-foreground);
 }
 
 @layer base {
