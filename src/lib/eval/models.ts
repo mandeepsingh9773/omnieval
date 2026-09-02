@@ -4,7 +4,7 @@ import type { ProviderId } from "./types";
 export const MODEL_CATALOG: Record<ProviderId, readonly string[]> = {
   openai: ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini", "o3-mini"],
   anthropic: ["claude-3-7-sonnet", "claude-3-5-haiku", "claude-haiku-4-5"],
-  gemini: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"],
+  gemini: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3.6-flash"],
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it"],
 };
 

@@ -41,7 +41,7 @@ const MODEL_PRICING: Record<string, ModelPrice> = {
   "gemini-2.5-pro": { inputUsdPer1M: 1.25, outputUsdPer1M: 10 },
   "gemini-2.5-flash": { inputUsdPer1M: 0.3, outputUsdPer1M: 2.5 },
   "gemini-2.5-flash-lite": { inputUsdPer1M: 0.1, outputUsdPer1M: 0.4 },
-  "gemini-2.0-flash": { inputUsdPer1M: 0.1, outputUsdPer1M: 0.4 },
+  "gemini-3.6-flash": { inputUsdPer1M: 0.3, outputUsdPer1M: 2.5 },
   "gemini-2.0-flash-lite": { inputUsdPer1M: 0.075, outputUsdPer1M: 0.3 },
   "gemini-1.5-pro": { inputUsdPer1M: 1.25, outputUsdPer1M: 5 },
   "gemini-1.5-flash": { inputUsdPer1M: 0.075, outputUsdPer1M: 0.3 },
