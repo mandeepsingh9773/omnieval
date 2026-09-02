@@ -217,7 +217,7 @@ export function ModelPanel({
               size="sm"
               aria-label="Provider"
               className={cn(
-                "h-7 shrink-0 rounded-md border px-1.5 text-[0.7rem] font-medium",
+                "h-7 shrink-0 rounded-md border px-1.5 text-xs font-medium",
                 providerStyle.trigger,
               )}
             >
@@ -360,7 +360,7 @@ export function ModelPanel({
             />
           </div>
         ) : (
-          <p className="text-center text-[0.7rem] text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground">
             Metrics appear once streaming starts
           </p>
         )}

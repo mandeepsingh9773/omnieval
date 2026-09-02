@@ -50,7 +50,7 @@ export function ProviderBadge({ provider }: { provider: ProviderId }) {
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-[0.7rem] font-medium whitespace-nowrap",
+        "inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
         style.badge,
       )}
     >

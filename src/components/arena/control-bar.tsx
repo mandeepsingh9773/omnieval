@@ -84,7 +84,7 @@ export function ControlBar(props: ControlBarProps) {
             onKeyDown={handleShortcut}
             placeholder="Ask the models anything…"
           />
-          <p className="text-[0.7rem] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Press <kbd className="rounded border bg-muted px-1 font-mono">⌘/Ctrl</kbd> +{" "}
             <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to run
           </p>

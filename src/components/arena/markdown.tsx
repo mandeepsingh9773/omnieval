@@ -45,7 +45,7 @@ function CodeBlock({ children }: { children: ReactNode }) {
       >
         {copied ? <Check className="text-status-success" /> : <Copy />}
       </Button>
-      <pre className="!my-3 overflow-x-auto rounded-lg border border-code-border bg-code-background p-3 text-[0.8125rem] leading-relaxed">
+      <pre className="!my-3 overflow-x-auto rounded-lg border border-code-border bg-code-background p-3 text-sm leading-relaxed">
         {children}
       </pre>
     </div>
@@ -63,7 +63,7 @@ const components: Components = {
       return <code className={className}>{children}</code>;
     }
     return (
-      <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em] before:content-none after:content-none">
+      <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.875em] before:content-none after:content-none">
         {children}
       </code>
     );

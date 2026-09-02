@@ -226,12 +226,12 @@ export function BlindPanel({
             />
           </div>
         ) : hasOutput && !error && !isStreaming ? (
-          <p className="flex items-center justify-center gap-1.5 text-center text-[0.7rem] text-muted-foreground">
+          <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
             <EyeOff className="size-3" />
             Vote to reveal the model and its metrics
           </p>
         ) : (
-          <p className="text-center text-[0.7rem] text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground">
             Metrics appear after you vote
           </p>
         )}
