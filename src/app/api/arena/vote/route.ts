@@ -24,12 +24,15 @@ const voteModelSchema = z.object({
 
 const voteRunSchema = z.object({
   output: z.string().max(128_000).default(""),
-  ttftMs: z.number().int().nonnegative().nullable().optional(),
-  totalLatencyMs: z.number().int().nonnegative().nullable().optional(),
+  ttftMs: z.number().nonnegative().nullable().optional(),
+  totalLatencyMs: z.number().nonnegative().nullable().optional(),
   inputTokens: z.number().int().nonnegative().nullable().optional(),
   outputTokens: z.number().int().nonnegative().nullable().optional(),
   estimatedCostUsd: z.number().nonnegative().nullable().optional(),
 });
+
+const roundInt = (value: number | null | undefined): number | null =>
+  value == null ? null : Math.round(value);
 
 const voteRequestSchema = z
   .object({
@@ -143,8 +146,8 @@ export async function POST(request: Request): Promise<NextResponse> {
             provider: PROVIDER_ENUM[modelA.provider],
             modelName: modelA.modelId,
             output: runA.output,
-            ttftMs: runA.ttftMs ?? null,
-            totalLatencyMs: runA.totalLatencyMs ?? null,
+            ttftMs: roundInt(runA.ttftMs),
+            totalLatencyMs: roundInt(runA.totalLatencyMs),
             inputTokens: runA.inputTokens ?? null,
             outputTokens: runA.outputTokens ?? null,
             estimatedCostUsd: runA.estimatedCostUsd ?? null,
@@ -154,8 +157,8 @@ export async function POST(request: Request): Promise<NextResponse> {
             provider: PROVIDER_ENUM[modelB.provider],
             modelName: modelB.modelId,
             output: runB.output,
-            ttftMs: runB.ttftMs ?? null,
-            totalLatencyMs: runB.totalLatencyMs ?? null,
+            ttftMs: roundInt(runB.ttftMs),
+            totalLatencyMs: roundInt(runB.totalLatencyMs),
             inputTokens: runB.inputTokens ?? null,
             outputTokens: runB.outputTokens ?? null,
             estimatedCostUsd: runB.estimatedCostUsd ?? null,

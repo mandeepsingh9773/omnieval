@@ -167,7 +167,7 @@ export function useModelStream(options?: UseModelStreamOptions): UseModelStreamR
             switch (event.type) {
               case "text": {
                 if (localTTFT === null) {
-                  localTTFT = performance.now() - requestStartedAt;
+                  localTTFT = Math.round(performance.now() - requestStartedAt);
                   // Real-time: surface TTFT as soon as the first delta lands.
                   setClientTTFTMs(localTTFT);
                 }

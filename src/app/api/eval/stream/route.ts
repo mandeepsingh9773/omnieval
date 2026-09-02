@@ -128,7 +128,8 @@ export async function POST(request: Request): Promise<Response> {
 
         const inputTokens = usage?.inputTokens ?? 0;
         const outputTokens = usage?.outputTokens ?? 0;
-        const ttftMs = firstChunkAt !== null ? Math.max(0, firstChunkAt - startedAt) : null;
+        const ttftMs =
+          firstChunkAt !== null ? Math.round(Math.max(0, firstChunkAt - startedAt)) : null;
         const generationMs =
           ttftMs !== null ? Math.max(0, finishedAt - firstChunkAt!) : null;
         const tokensPerSecond =
@@ -142,7 +143,7 @@ export async function POST(request: Request): Promise<Response> {
           provider,
           modelId,
           ttftMs,
-          totalLatencyMs: Math.max(0, finishedAt - startedAt),
+          totalLatencyMs: Math.round(Math.max(0, finishedAt - startedAt)),
           generationMs,
           tokensPerSecond,
           inputTokens,
