@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FlaskConical, type LucideIcon } from "lucide-react";
+import { BookOpen, FlaskConical, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KeyVaultDialog } from "@/components/byok/key-vault-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -15,12 +15,15 @@ export interface AppHeaderProps {
     label: string;
     icon: LucideIcon;
   };
+  /** Hide the "User Guide" link (used while already viewing the guide). */
+  hideGuide?: boolean;
 }
 
 export function AppHeader({
   subtitle,
   icon: BrandIcon = FlaskConical,
   nav,
+  hideGuide = false,
 }: AppHeaderProps) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
@@ -41,6 +44,14 @@ export function AppHeader({
             {nav.label}
           </Link>
         </Button>
+        {!hideGuide && (
+          <Button asChild variant="outline" size="sm">
+            <Link href="/guide">
+              <BookOpen />
+              User Guide
+            </Link>
+          </Button>
+        )}
         <KeyVaultDialog />
         <ThemeToggle />
       </div>
